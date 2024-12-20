@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="text-center">
+            <h1 class="text-success mb-4">Payment Successful!</h1>
+            <p class="lead">Thank you for your payment. Your booking is confirmed.</p>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Booking Details</h5>
+            </div>
+            <div class="card-body">
+                {% if booking_data %}
+                    <p><strong>Invoice ID:</strong> {{ booking_data.invoice_id }}</p>
+                    <p><strong>Total Amount:</strong> ${{ booking_data.total_amount }}</p>
+                    <p><strong>Payment Date:</strong> {{ booking_data.date }}</p>
+
+                    <h5 class="mt-4">Passengers:</h5>
+                    <ul>
+                        {% for passenger in booking_data.passengers %}
+                            <li>
+                                <strong>{{ passenger.first_name }} {{ passenger.last_name }}</strong>
+                                <br>Date of Birth: {{ passenger.date_of_birth }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No booking data available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="/" class="btn btn-primary">Go to Homepage</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

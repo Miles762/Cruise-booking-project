@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Invoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Booking Invoice</h1>
+
+        <!-- Invoice Details -->
+        <h4>Invoice Details:</h4>
+        <p><strong>Invoice ID:</strong> {{ booking_data.invoice_id }}</p>
+        <p><strong>Date:</strong> {{ booking_data.date }}</p>
+        <p><strong>Due Date:</strong> {{ booking_data.due_date }}</p>
+        <hr>
+
+        <!-- Number of Passengers -->
+        <h4>Number of Passengers:</h4>
+        <p>{{ booking_data.num_passengers }}</p>
+        <hr>
+
+        <!-- Passenger Details -->
+        <h4>Passenger Details:</h4>
+        <ul>
+            {% for passenger in booking_data.passengers %}
+                <li>
+                    <strong>{{ passenger.first_name }} {{ passenger.last_name }}</strong><br>
+                    Date of Birth: {{ passenger.date_of_birth }}<br>
+                    Blood Group: {{ passenger.blood_group }}
+                </li>
+            {% endfor %}
+        </ul>
+        <hr>
+
+        <!-- Stateroom Selection -->
+        <h4>Selected Stateroom:</h4>
+        <p>{{ booking_data.stateroom.type }}</p>
+        <hr>
+
+        <!-- Side Selection -->
+        <h4>Selected Side:</h4>
+        <p>{{ booking_data.side.name }}</p>
+        <hr>
+
+        <!-- Room Cost -->
+        <h4>Room Cost:</h4>
+        <p>${{ booking_data.cost }}</p>
+        <hr>
+
+        <!-- Selected Packages -->
+        <h4>Selected Packages:</h4>
+        <ul>
+            {% for package in booking_data.packages %}
+                <li>{{ package.package_name }} - ${{ package.cost }}</li>
+            {% endfor %}
+        </ul>
+        <h5>Total Package Cost: ${{ booking_data.total_package_cost }}</h5>
+        <hr>
+
+        <!-- Total Amount -->
+        <h4>Total Amount:</h4>
+        <p><strong>${{ booking_data.total_amount }}</strong></p>
+
+        <!-- Navigation Buttons -->
+        <div class="mt-4">
+            <a href="{% url 'booking' %}" class="btn btn-primary">Go Back</a>
+            <a href="{% url 'payment' %}" class="btn btn-success">Make Payment</a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Make Payment</h1>
+
+        <!-- Payment Details -->
+        <form id="payment-form">
+            <div class="mb-4">
+                <label for="invoice_id" class="form-label">Invoice ID</label>
+                <input type="text" id="invoice_id" name="invoice_id" class="form-control" value="{{ booking_data.invoice_id }}" readonly>
+            </div>
+            <div class="mb-4">
+                <label for="total_amount" class="form-label">Total Amount</label>
+                <input type="text" id="total_amount" name="total_amount" class="form-control" value="{{ booking_data.total_amount }}" readonly>
+            </div>
+
+            <!-- Stripe Elements -->
+            <div id="card-element" class="mb-4">
+                <!-- Stripe will insert the Card Element here -->
+            </div>
+            <div id="card-errors" role="alert" class="text-danger mb-4"></div>
+
+            <button type="submit" class="btn btn-success btn-lg w-100" id="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const stripe = Stripe("pk_test_51QTEgrHlpqUbRcnjr6PjbrdsweKnGNvxXeQ1Sr9O74gOKAqEig2o3VcmK8oOxFKhraGBPAASP0dLmVFOm8y0DedK00cKgFmM7j");
+        const elements = stripe.elements();
+
+        // Create an instance of the Card Element
+        const cardElement = elements.create("card", {
+            style: {
+                base: {
+                    color: "#32325d",
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSmoothing: "antialiased",
+                    fontSize: "16px",
+                    "::placeholder": { color: "#aab7c4" },
+                },
+                invalid: { color: "#fa755a", iconColor: "#fa755a" },
+            },
+        });
+        cardElement.mount("#card-element");
+
+        const form = document.getElementById("payment-form");
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const submitButton = document.getElementById("submit");
+            submitButton.disabled = true; // Disable submit button
+
+            console.log("Validating card...");
+            const { paymentMethod, error } = await stripe.createPaymentMethod({
+                type: "card",
+                card: cardElement,
+                billing_details: {
+                    name: `Invoice #${document.getElementById("invoice_id").value}`,
+                },
+            });
+
+            if (error) {
+                // Display card validation errors
+                console.error("Card Validation Error:", error.message);
+                const cardErrors = document.getElementById("card-errors");
+                cardErrors.textContent = error.message;
+                submitButton.disabled = false; // Re-enable button
+            } else {
+                // Card is valid; send data to backend
+                fetch("{% url 'confirm_payment' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: JSON.stringify({
+                        payment_method_id: paymentMethod.id,
+                        invoice_id: document.getElementById("invoice_id").value,
+                        total_amount: document.getElementById("total_amount").value,
+                    }),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("Request sent to confirm_payment.");
+                    } else {
+                        console.error("Server returned an error.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error sending data to backend:", error);
+                })
+                .finally(() => {
+                    // Re-enable the submit button
+                    submitButton.disabled = false;
+                });
+            }
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
